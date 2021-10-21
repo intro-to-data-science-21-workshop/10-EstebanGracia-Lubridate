@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Dates and times with Lubridate</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Esteban Gracia &amp; Lorenzo Gini" />
+    <script src="libs/header-attrs-2.11/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Dates and times with Lubridate
+### Esteban Gracia &amp; Lorenzo Gini
+### Introduction to Data Science
+
+---
+
+#Questions about time
+
+- How many days has a year?
+- How many hours has a day?
+- How many seconds has a minute?  
+
+---
+background-image: url(maths_lady.png) 
+class: center, bottom, inverse
+
+# Source: knowyourmeme.com
+--- 
+---
+  
+
+# Dates and times with Lubridate
+
+Install **tidyverse** package and add the  **lubridate** library in RStudio:
+
+
+
+```r
+install.packages("tidyverse")  
+library(lubridate)
+library(nycflights13)
+```
+
+---
+
+###What types of date/times exists:  
+
+- Dates : a day stored as the number of days since 1970-01-01   
+
+- Time within a day: time stored as the number of seconds since 00:00:00  
+
+- **Date/time (date +time)**: is a point on the timeline, stored as the number of seconds since 1970-01-01 00:00:00 UTC
+
+```r
+as_date(17498) #Summing 17.498 days to 1970-01-01
+```
+
+```
+## [1] "2017-11-28"
+```
+
+```r
+hms::as_hms(85) #Summing 85 seconds
+```
+
+```
+## 00:01:25
+```
+
+```r
+as_datetime(1511870400) #Summing 1511870400 seconds to 1970-01-01
+```
+
+```
+## [1] "2017-11-28 12:00:00 UTC"
+```
+
+ 
+ 
+---
+#Parsing date-times
+
+- Identify the order of the year (y), month (m), day (d), hour (h),
+minute (m) and second (s) elements in your data.
+
+###From strings 
+
+
+
+```r
+ymd("2017-01-31") # 1. year 2. month 3. day
+```
+
+```
+## [1] "2017-01-31"
+```
+
+```r
+mdy("January 31st, 2017") #  1. month 2. day 3. year
+```
+
+```
+## [1] "2017-01-31"
+```
+
+```r
+dmy("31-Jan-2017") #  1. day 2. month 3. year
+```
+
+```
+## [1] "2017-01-31"
+```
+ 
+---
+###From individual components
+
+
+```r
+flights %&gt;% #Taken the df from library nycflights
+  select(year, month, day, hour, minute) %&gt;%  
+  mutate(departure = make_datetime(year, month, day, hour, minute))  
+```
+
+```
+## # A tibble: 336,776 × 6
+##     year month   day  hour minute departure          
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dttm&gt;             
+##  1  2013     1     1     5     15 2013-01-01 05:15:00
+##  2  2013     1     1     5     29 2013-01-01 05:29:00
+##  3  2013     1     1     5     40 2013-01-01 05:40:00
+##  4  2013     1     1     5     45 2013-01-01 05:45:00
+##  5  2013     1     1     6      0 2013-01-01 06:00:00
+##  6  2013     1     1     5     58 2013-01-01 05:58:00
+##  7  2013     1     1     6      0 2013-01-01 06:00:00
+##  8  2013     1     1     6      0 2013-01-01 06:00:00
+##  9  2013     1     1     6      0 2013-01-01 06:00:00
+## 10  2013     1     1     6      0 2013-01-01 06:00:00
+## # … with 336,766 more rows
+```
+  
+---
+
+# Date time components
+
+##Getting 
+
+Taking a single value of the date
+ 
+
+```r
+datetime &lt;- ymd_hms("2016-07-08 12:34:56")
+
+year(datetime) #take the year
+```
+
+```
+## [1] 2016
+```
+
+```r
+month(datetime) #take the month
+```
+
+```
+## [1] 7
+```
+
+```r
+mday(datetime) #take the day
+```
+
+```
+## [1] 8
+```
+  
+---
+ 
+
+# Date time components
+
+##Setting 
+
+Changing a single value of the date
+ 
+
+```r
+datetime &lt;- ymd_hms("2016-07-08 12:34:56")
+
+day(datetime) &lt;- 10 #changing 8 to 10
+datetime  
+```
+
+```
+## [1] "2016-07-10 12:34:56 UTC"
+```
+
+```r
+month(datetime) &lt;- 12 #changing 7 to 12
+datetime 
+```
+
+```
+## [1] "2016-12-10 12:34:56 UTC"
+```
+---
+
+#Abrreviated name of month or week
+
+
+```
+## [1] Jul
+## 12 Levels: Jan &lt; Feb &lt; Mar &lt; Apr &lt; May &lt; Jun &lt; Jul &lt; Aug &lt; Sep &lt; ... &lt; Dec
+```
+
+```
+## [1] Friday
+## 7 Levels: Sunday &lt; Monday &lt; Tuesday &lt; Wednesday &lt; Thursday &lt; ... &lt; Saturday
+```
+
+
+---
+#Round, floor and ceiling for dates 
+
+See how different is the value from each function
+
+```r
+x &lt;- ymd_hms("2009-08-03 12:01:59.23") 
+
+round_date(x, "day") #after mid-day
+```
+
+```
+## [1] "2009-08-04 UTC"
+```
+
+```r
+floor_date(x, "day") #before mid-day
+```
+
+```
+## [1] "2009-08-03 UTC"
+```
+
+```r
+ceiling_date(x, "day") #after mid-day
+```
+
+```
+## [1] "2009-08-04 UTC"
+```
+---
+#Round, floor and ceiling for dates 
+See how it changes depending the function
+
+```r
+x &lt;- ymd_hms("2009-08-22 12:01:59.23")
+
+round_date(x, "month") #more September than August
+```
+
+```
+## [1] "2009-09-01 UTC"
+```
+
+```r
+floor_date(x, "month") #Still September
+```
+
+```
+## [1] "2009-08-01 UTC"
+```
+
+```r
+ceiling_date(x, "month") #more September than August
+```
+
+```
+## [1] "2009-09-01 UTC"
+```
+ 
+
+---
+  
+# Stamping a template to dates
+
+```yaml
+date_by_Hertie &lt;- stamp("Created by Hertie, Jan 17, 1999 3:34")   
+``` 
+
+
+
+```r
+date_by_Hertie(ymd("2010-04-05")) #Stamping
+```
+
+```
+## [1] "Created by Hertie, Apr 05, 2010 00:00"
+```
+
+---
+
+#Timezones
+
+###Listing timezones
+
+```r
+OlsonNames() %&gt;% #List of Timezones
+  sample(30) #Taking a sample of 30 tz
+```
+
+```
+##  [1] "Africa/Porto-Novo"         "Africa/Monrovia"          
+##  [3] "Europe/Jersey"             "Asia/Kashgar"             
+##  [5] "Asia/Ashkhabad"            "America/Dawson_Creek"     
+##  [7] "Asia/Tomsk"                "Pacific/Fakaofo"          
+##  [9] "ROC"                       "America/St_Thomas"        
+## [11] "Africa/Libreville"         "Australia/LHI"            
+## [13] "America/Indiana/Marengo"   "Asia/Jakarta"             
+## [15] "America/Havana"            "Africa/Djibouti"          
+## [17] "America/Jamaica"           "America/Campo_Grande"     
+## [19] "Africa/Sao_Tome"           "America/Port_of_Spain"    
+## [21] "Indian/Maldives"           "US/Alaska"                
+## [23] "America/Argentina/Ushuaia" "America/Paramaribo"       
+## [25] "America/Aruba"             "Pacific/Tongatapu"        
+## [27] "Asia/Novokuznetsk"         "America/Argentina/Cordoba"
+## [29] "Australia/Melbourne"       "Pacific/Funafuti"
+```
+---
+###Timezones
+####Get the same data-time in different time zone
+
+Getting the current hour in my system: Berlin, Germany
+
+```r
+x &lt;- now(tzone = Sys.timezone()) #Current hour in my pc
+x
+```
+
+```
+## [1] "2021-10-21 17:18:29 CEST"
+```
+Getting the same hour in Bogotá, Colombia
+
+```r
+berlin_to_bogota &lt;- with_tz(x, tzon="America/Bogota") #7 Hours diff
+berlin_to_bogota
+```
+
+```
+## [1] "2021-10-21 10:18:29 -05"
+```
+
+---
+
+# Periods and Durations
+ 
+
+```r
+x_date&lt;- ymd_hms("2021-02-27 12:00:00") 
+y_date &lt;- ymd_hms("2021-03-01 00:00:00")
+```
+
+###Intervals
+Intervals are timespans that begin at a specific instant and end at a specific instant. They provide the only reliable way to convert between periods and durations.
+
+```r
+dates &lt;- interval((x_date),(y_date)) 
+dates #Dates now stores an interval of dates
+```
+
+```
+## [1] 2021-02-27 12:00:00 UTC--2021-03-01 UTC
+```
+---
+###Periods
+Periods track the change in the "clock time" between two date-times. 
+
+```r
+period_dates &lt;- as.period(dates) 
+period_dates #Change in clock time of interval
+```
+
+```
+## [1] "1d 12H 0M 0S"
+```
+###Durations
+Durations record the exact number of seconds in a time span (provide a method for treating time as a mathematical quantity)
+
+```r
+duration_dates &lt;- as.duration(period_dates)
+duration_dates #Seconds between the interval
+```
+
+```
+## [1] "129600s (~1.5 days)"
+```
+ 
+---
+
+#References
+ 
+- Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of Statistical Software, 40(3), 1-25. https://www.jstatsoft.org/v40/i03/.
+
+- Lubridate by Vitalie Spinu, Garrett Grolemund, Hadley Wickham. https://lubridate.tidyverse.org/index.html 
+---
+class: center, middle
+# Thanks!
+
+Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan). 
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

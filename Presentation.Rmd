@@ -1,0 +1,236 @@
+---
+title: "Dates and times with Lubridate" 
+author: "Esteban Gracia & Lorenzo Gini"
+institute: "Introduction to Data Science" 
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+#Questions about time
+
+- How many days has a year?
+- How many hours has a day?
+- How many seconds has a minute?  
+
+---
+background-image: url(maths_lady.png) 
+class: center, bottom, inverse
+
+# Source: knowyourmeme.com
+--- 
+---
+  
+
+# Dates and times with Lubridate
+
+Install **tidyverse** package and add the  **lubridate** library in RStudio:
+
+```{r load-packages, include=FALSE}
+library(tidyverse)  
+library(lubridate)
+library(nycflights13)
+```
+```{r eval=FALSE, tidy=FALSE}
+install.packages("tidyverse")  
+library(lubridate)
+library(nycflights13)
+```
+
+---
+
+###What types of date/times exists:  
+
+- Dates : a day stored as the number of days since 1970-01-01   
+
+- Time within a day: time stored as the number of seconds since 00:00:00  
+
+- **Date/time (date +time)**: is a point on the timeline, stored as the number of seconds since 1970-01-01 00:00:00 UTC
+```{r}
+as_date(17498) #Summing 17.498 days to 1970-01-01
+hms::as_hms(85) #Summing 85 seconds
+as_datetime(1511870400) #Summing 1511870400 seconds to 1970-01-01
+```
+
+ 
+ 
+---
+#Parsing date-times
+
+- Identify the order of the year (y), month (m), day (d), hour (h),
+minute (m) and second (s) elements in your data.
+
+###From strings 
+
+
+```{r}
+ymd("2017-01-31") # 1. year 2. month 3. day
+mdy("January 31st, 2017") #  1. month 2. day 3. year
+dmy("31-Jan-2017") #  1. day 2. month 3. year
+
+```
+ 
+---
+###From individual components
+
+```{r}
+flights %>% #Taken the df from library nycflights
+  select(year, month, day, hour, minute) %>%  
+  mutate(departure = make_datetime(year, month, day, hour, minute))  
+ 
+```
+  
+---
+
+# Date time components
+
+##Getting 
+
+Taking a single value of the date
+ 
+```{r}
+datetime <- ymd_hms("2016-07-08 12:34:56")
+
+year(datetime) #take the year
+month(datetime) #take the month
+mday(datetime) #take the day
+```
+  
+---
+ 
+
+# Date time components
+
+##Setting 
+
+Changing a single value of the date
+ 
+```{r}
+datetime <- ymd_hms("2016-07-08 12:34:56")
+
+day(datetime) <- 10 #changing 8 to 10
+datetime  
+month(datetime) <- 12 #changing 7 to 12
+datetime 
+```
+---
+
+#Abrreviated name of month or week
+
+```{r echo=FALSE, message=FALSE, size="tiny"}
+
+datetime <- ymd_hms("2016-07-08 12:34:56") 
+
+month(datetime, label = TRUE) #Taking the month name
+wday(datetime, label = TRUE, abbr = FALSE) #Taking day name
+
+```
+
+
+---
+#Round, floor and ceiling for dates 
+
+See how different is the value from each function
+```{r}
+x <- ymd_hms("2009-08-03 12:01:59.23") 
+
+round_date(x, "day") #after mid-day
+floor_date(x, "day") #before mid-day
+ceiling_date(x, "day") #after mid-day
+
+```
+---
+#Round, floor and ceiling for dates 
+See how it changes depending the function
+```{r}
+x <- ymd_hms("2009-08-22 12:01:59.23")
+
+round_date(x, "month") #more September than August
+floor_date(x, "month") #Still September
+ceiling_date(x, "month") #more September than August
+```
+ 
+
+---
+  
+# Stamping a template to dates
+
+```yaml
+date_by_Hertie <- stamp("Created by Hertie, Jan 17, 1999 3:34")   
+``` 
+```{r include=FALSE}
+date_by_Hertie <- stamp("Created by Hertie, Jan 17, 1999 3:34") #"Created by Hertie" in object
+```
+
+```{r}
+date_by_Hertie(ymd("2010-04-05")) #Stamping
+```
+
+---
+
+#Timezones
+
+###Listing timezones
+```{r}
+OlsonNames() %>% #List of Timezones
+  sample(30) #Taking a sample of 30 tz
+```
+---
+###Timezones
+####Get the same data-time in different time zone
+
+Getting the current hour in my system: Berlin, Germany
+```{r} 
+x <- now(tzone = Sys.timezone()) #Current hour in my pc
+x
+``` 
+Getting the same hour in Bogotá, Colombia
+```{r}   
+berlin_to_bogota <- with_tz(x, tzon="America/Bogota") #7 Hours diff
+berlin_to_bogota
+``` 
+
+---
+
+# Periods and Durations
+ 
+```{r}
+x_date<- ymd_hms("2021-02-27 12:00:00") 
+y_date <- ymd_hms("2021-03-01 00:00:00")
+```
+
+###Intervals
+Intervals are timespans that begin at a specific instant and end at a specific instant. They provide the only reliable way to convert between periods and durations.
+```{r}
+dates <- interval((x_date),(y_date)) 
+dates #Dates now stores an interval of dates
+```
+---
+###Periods
+Periods track the change in the "clock time" between two date-times. 
+```{r}
+period_dates <- as.period(dates) 
+period_dates #Change in clock time of interval
+```
+###Durations
+Durations record the exact number of seconds in a time span (provide a method for treating time as a mathematical quantity)
+```{r}
+duration_dates <- as.duration(period_dates)
+duration_dates #Seconds between the interval
+```
+ 
+---
+
+#References
+ 
+- Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of Statistical Software, 40(3), 1-25. https://www.jstatsoft.org/v40/i03/.
+
+- Lubridate by Vitalie Spinu, Garrett Grolemund, Hadley Wickham. https://lubridate.tidyverse.org/index.html 
+---
+class: center, middle
+# Thanks!
+
+Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan). 
