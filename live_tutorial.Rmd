@@ -1,0 +1,99 @@
+---
+title: "Live tutorial"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Get started with lubridate
+
+Lubridate it is a very useful package when you have to work with dates. Let's see how to download and install (spoiler: it is as any other R packages).
+Digit on the console install.packages("lubridate") and then... load it!
+
+```{r}
+library(tidyverse)
+library(lubridate)
+
+```
+
+Once you have done it we can start to work with it. 
+Let's start with the easy, but very useful. functions. How many times do you need to convert number or string in a date? (I know, none. But that is what we are doing okay, so keep attention).
+
+```{r}
+
+ymd('1948-11-13')
+ydm('19982111') 
+ydm(19982111)
+
+```
+
+Wow! If you were focused you notice that the functions called are different.Let me explain: y = years, d = day, m = month and you can use the order that you need! Cool, isn't it? It works in very different situations, when it fails?
+
+```{r}
+
+ymd('1948-13-13')
+ydm(19584105)
+ydm('199821111') 
+
+```
+One interesting features of the library is to manage with time zone.
+
+```{r}
+french_revolution <- mdy_hm('jul 14st, 1789 12:34', tz = 'cet')
+french_revolution
+with_tz(french_revolution, tz = 'America/Bogota')
+```
+
+
+Everyone love works with tidy data, but be realistic how many times this happen? Lubridate helps you also with that.
+
+```{r}
+x <- c("09-07-01", "05-01-02", "09-01-13", "09-11-2003")
+
+parse_date_time(x, "ymd") 
+parse_date_time(x, c("ymd", "dmy"))
+
+```
+
+I wont know show the more useful function of the library: make_datetime. Given the input of year, month, day, hours, ... it return the date. Let's apply it to a small dataset to see how it works.
+
+```{r}
+
+d = data.frame(day = c(2,5,23,31), month = c(3,6,12,4), year = c(1996,1998,2003,1345))
+d
+d %>% 
+  select(year, month, day) %>% 
+  mutate(date = make_datetime(year, month, day))
+
+
+```
+
+Now that we know the bases from this and the presentation try to apply them. We are facing a well known problem. Know the age of death of the Cech Repubblic deputies. 
+
+```{r}
+library(legislatoR)
+
+cze_core <- get_core(legislature = "cze")
+
+cze_core %>%
+  filter(!is.na(death)) %>%
+  mutate(life_duration = interval((birth),(death))) %>%
+  mutate(life_duration = life_duration %/% years(1)) %>% 
+  pull(life_duration)
+
+```
+
+Wow very quick, I passed hours on this exercise a couple of weeks ago... Almost finished, let's have some fun. Who wants to plot the day of the week in wich the politicians born?
+
+```{r}
+
+cze_core %>% 
+  mutate(day_birth = wday(birth, label = T)) %>% 
+  filter(!is.na(day_birth)) %>% 
+  ggplot(aes(x = day_birth)) +
+  geom_bar(fill="black") +
+  labs(x = 'Day of the week' , y = 'Freq', title = "Day of birth")
+
+```

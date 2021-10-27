@@ -3,10 +3,6 @@ library(legislatoR)
 library(lubridate)
 library(ggplot2)
 
-
-
-
-
 # cze_core %>%
 #   filter(!is.na(death)) %>% 
 #   mutate(life_duration = interval((birth),(death))) %>%
@@ -35,7 +31,8 @@ cze_core <- get_core(legislature = "cze")
 cze_core %>%
   filter(!is.na(death)) %>%
   mutate(life_duration = interval((birth),(death))) %>%
-  mutate(life_duration %/% years(1))
+  mutate(life_duration = life_duration %/% years(1)) %>% 
+  pull(life_duration)
 
 cze_core %>% 
   mutate(day_birth = wday(birth, label = T)) %>% 
