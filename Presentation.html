@@ -22,82 +22,94 @@ class: center, middle, inverse, title-slide
 
 - How many days has a year?
 - How many hours has a day?
-- How many seconds has a minute?  
+- How many seconds has a minute?   
+--
+&lt;div class="figure" style="text-align: right"&gt;
+&lt;img src="maths_lady.png" alt="Source: knowyourmeme.com" width="50%" /&gt;
+&lt;p class="caption"&gt;Source: knowyourmeme.com&lt;/p&gt;
+&lt;/div&gt;
+ 
+---
+#Working with dates
+
+- Convert date-strings to a date-time object
+- Find and use the day, month or year from a Date-time object
+- Convert timezones 
+
 
 ---
-background-image: url(maths_lady.png) 
-class: center, bottom, inverse
-
-# Source: knowyourmeme.com
---- 
----
-  
 
 # Dates and times with Lubridate
 
-Install **tidyverse** package and add the  **lubridate** library in RStudio:
+Lubridate is installed with the tidiverse: 
 
 
 
 ```r
 install.packages("tidyverse")  
 library(lubridate)
-library(nycflights13)
+library(nycflights13) 
 ```
 
 ---
+#DateTime objects
 
-###What types of date/times exists:  
+- We have dates
+- POSIXct and POSIXlt classes 
+--
+(What?)
+--
 
-- Dates : a day stored as the number of days since 1970-01-01   
-
-- Time within a day: time stored as the number of seconds since 00:00:00  
-
-- **Date/time (date +time)**: is a point on the timeline, stored as the number of seconds since 1970-01-01 00:00:00 UTC
-
-```r
-as_date(17498) #Summing 17.498 days to 1970-01-01
-```
-
-```
-## [1] "2017-11-28"
-```
 
 ```r
-hms::as_hms(85) #Summing 85 seconds
+like_date &lt;- as.Date("2021-11-04") 
+str(like_date)
 ```
 
 ```
-## 00:01:25
+##  Date[1:1], format: "2021-11-04"
 ```
+--
+
 
 ```r
-as_datetime(1511870400) #Summing 1511870400 seconds to 1970-01-01
+like_datetime &lt;- as_datetime("2021-11-04")
+str(like_datetime)
 ```
 
 ```
-## [1] "2017-11-28 12:00:00 UTC"
+##  POSIXct[1:1], format: "2021-11-04"
 ```
-
- 
- 
+  
 ---
 #Parsing date-times
 
-- Identify the order of the year (y), month (m), day (d), hour (h),
-minute (m) and second (s) elements in your data.
-
-###From strings 
+- How often do we have the correct order in dates in our dataset?
 
 
+- January 31, 2017
+- 31 January, 2017
+- 2017, January 31
+
+--
 
 ```r
-ymd("2017-01-31") # 1. year 2. month 3. day
+"2017-01-31" 
 ```
 
 ```
 ## [1] "2017-01-31"
 ```
+--
+
+```r
+ymd("2017-01-31") # 1. year 2. month 3. day 
+```
+
+```
+## [1] "2017-01-31"
+```
+--
 
 ```r
 mdy("January 31st, 2017") #  1. month 2. day 3. year
@@ -106,18 +118,11 @@ mdy("January 31st, 2017") #  1. month 2. day 3. year
 ```
 ## [1] "2017-01-31"
 ```
-
-```r
-dmy("31-Jan-2017") #  1. day 2. month 3. year
-```
-
-```
-## [1] "2017-01-31"
-```
- 
 ---
 ###From individual components
 
+--
+You can create a variable with datetime objects
 
 ```r
 flights %&gt;% #Taken the df from library nycflights
@@ -146,28 +151,33 @@ flights %&gt;% #Taken the df from library nycflights
 
 # Date time components
 
-##Getting 
-
-Taking a single value of the date
- 
 
 ```r
-datetime &lt;- ymd_hms("2016-07-08 12:34:56")
+datetime &lt;- ymd_hms("2016-07-08 12:34:56") 
+```
+--
+##Getting 
 
-year(datetime) #take the year
+--
+####Taking a single value of the date
+
+```r
+year(datetime) #take the year 
 ```
 
 ```
 ## [1] 2016
 ```
+--
 
 ```r
-month(datetime) #take the month
+month(datetime) #take the month 
 ```
 
 ```
 ## [1] 7
 ```
+--
 
 ```r
 mday(datetime) #take the day
@@ -177,19 +187,23 @@ mday(datetime) #take the day
 ## [1] 8
 ```
   
+  
 ---
- 
 
 # Date time components
 
+
+```r
+datetime &lt;- ymd_hms("2016-07-08 12:34:56") 
+```
+--
 ##Setting 
 
-Changing a single value of the date
+--
+####Changing a single value of the date
  
 
 ```r
-datetime &lt;- ymd_hms("2016-07-08 12:34:56")
-
 day(datetime) &lt;- 10 #changing 8 to 10
 datetime  
 ```
@@ -197,6 +211,7 @@ datetime
 ```
 ## [1] "2016-07-10 12:34:56 UTC"
 ```
+--
 
 ```r
 month(datetime) &lt;- 12 #changing 7 to 12
@@ -211,78 +226,94 @@ datetime
 #Abrreviated name of month or week
 
 
-```
-## [1] Jul
-## 12 Levels: Jan &lt; Feb &lt; Mar &lt; Apr &lt; May &lt; Jun &lt; Jul &lt; Aug &lt; Sep &lt; ... &lt; Dec
-```
+```r
 
-```
-## [1] Friday
-## 7 Levels: Sunday &lt; Monday &lt; Tuesday &lt; Wednesday &lt; Thursday &lt; ... &lt; Saturday
-```
+datetime &lt;- ymd_hms("2016-07-08 12:34:56") 
 
+month(datetime, label = TRUE) #Taking the month name  
+[1] Jul
+12 Levels: Jan &lt; Feb &lt; Mar &lt; Apr &lt; May &lt; Jun &lt; Jul &lt; Aug &lt; Sep &lt; ... &lt; Dec
+```
+--
+
+```r
+
+wday(datetime, label = TRUE, abbr = FALSE) #Taking day name
+[1] Friday
+7 Levels: Sunday &lt; Monday &lt; Tuesday &lt; Wednesday &lt; Thursday &lt; ... &lt; Saturday
+```
 
 ---
 #Round, floor and ceiling for dates 
 
+
+```r
+new_date &lt;- ymd_hms("2009-08-03 12:01:59.23")  
+```
+--
 See how different is the value from each function
 
 ```r
-x &lt;- ymd_hms("2009-08-03 12:01:59.23") 
-
-round_date(x, "day") #after mid-day
+round_date(new_date, "day") #after mid-day  
 ```
 
 ```
 ## [1] "2009-08-04 UTC"
 ```
+--
 
 ```r
-floor_date(x, "day") #before mid-day
+floor_date(new_date, "day") #before mid-day  
 ```
 
 ```
 ## [1] "2009-08-03 UTC"
 ```
+--
 
 ```r
-ceiling_date(x, "day") #after mid-day
+ceiling_date(new_date, "day") #after mid-day
 ```
 
 ```
 ## [1] "2009-08-04 UTC"
 ```
 ---
+
 #Round, floor and ceiling for dates 
 See how it changes depending the function
 
-```r
-x &lt;- ymd_hms("2009-08-22 12:01:59.23")
 
-round_date(x, "month") #more September than August
+```r
+new_date_2 &lt;- ymd_hms("2009-08-22 12:01:59.23") 
+```
+--
+
+```r
+round_date(new_date_2, "month") #more September than August 
 ```
 
 ```
 ## [1] "2009-09-01 UTC"
 ```
+--
 
 ```r
-floor_date(x, "month") #Still September
+floor_date(new_date_2, "month") #Still September 
 ```
 
 ```
 ## [1] "2009-08-01 UTC"
 ```
+--
 
 ```r
-ceiling_date(x, "month") #more September than August
+ceiling_date(new_date_2, "month") #more September than August
 ```
 
 ```
 ## [1] "2009-09-01 UTC"
 ```
- 
-
 ---
   
 # Stamping a template to dates
@@ -309,28 +340,16 @@ date_by_Hertie(ymd("2010-04-05")) #Stamping
 
 ```r
 OlsonNames() %&gt;% #List of Timezones
-  sample(30) #Taking a sample of 30 tz
+  sample(10) #Taking a sample of 30 tz
 ```
 
 ```
-##  [1] "Africa/Porto-Novo"         "Africa/Monrovia"          
-##  [3] "Europe/Jersey"             "Asia/Kashgar"             
-##  [5] "Asia/Ashkhabad"            "America/Dawson_Creek"     
-##  [7] "Asia/Tomsk"                "Pacific/Fakaofo"          
-##  [9] "ROC"                       "America/St_Thomas"        
-## [11] "Africa/Libreville"         "Australia/LHI"            
-## [13] "America/Indiana/Marengo"   "Asia/Jakarta"             
-## [15] "America/Havana"            "Africa/Djibouti"          
-## [17] "America/Jamaica"           "America/Campo_Grande"     
-## [19] "Africa/Sao_Tome"           "America/Port_of_Spain"    
-## [21] "Indian/Maldives"           "US/Alaska"                
-## [23] "America/Argentina/Ushuaia" "America/Paramaribo"       
-## [25] "America/Aruba"             "Pacific/Tongatapu"        
-## [27] "Asia/Novokuznetsk"         "America/Argentina/Cordoba"
-## [29] "Australia/Melbourne"       "Pacific/Funafuti"
+##  [1] "Africa/Bujumbura" "America/Antigua"  "Europe/Volgograd" "Canada/Atlantic" 
+##  [5] "Mexico/BajaSur"   "Europe/Paris"     "America/Tortola"  "Europe/Ljubljana"
+##  [9] "Asia/Sakhalin"    "America/Creston"
 ```
 ---
-###Timezones
+#Timezones
 ####Get the same data-time in different time zone
 
 Getting the current hour in my system: Berlin, Germany
@@ -341,8 +360,9 @@ x
 ```
 
 ```
-## [1] "2021-10-21 17:18:29 CEST"
+## [1] "2021-10-27 15:47:05 CEST"
 ```
+--
 Getting the same hour in Bogotá, Colombia
 
 ```r
@@ -351,17 +371,17 @@ berlin_to_bogota
 ```
 
 ```
-## [1] "2021-10-21 10:18:29 -05"
+## [1] "2021-10-27 08:47:05 -05"
 ```
 
 ---
 
-# Periods and Durations
+# Periods, durations and intervals
  
 
 ```r
 x_date&lt;- ymd_hms("2021-02-27 12:00:00") 
-y_date &lt;- ymd_hms("2021-03-01 00:00:00")
+y_date &lt;- ymd_hms("2021-03-01 01:00:00")
 ```
 
 ###Intervals
@@ -373,7 +393,7 @@ dates #Dates now stores an interval of dates
 ```
 
 ```
-## [1] 2021-02-27 12:00:00 UTC--2021-03-01 UTC
+## [1] 2021-02-27 12:00:00 UTC--2021-03-01 01:00:00 UTC
 ```
 ---
 ###Periods
@@ -385,7 +405,7 @@ period_dates #Change in clock time of interval
 ```
 
 ```
-## [1] "1d 12H 0M 0S"
+## [1] "1d 13H 0M 0S"
 ```
 ###Durations
 Durations record the exact number of seconds in a time span (provide a method for treating time as a mathematical quantity)
@@ -396,16 +416,18 @@ duration_dates #Seconds between the interval
 ```
 
 ```
-## [1] "129600s (~1.5 days)"
+## [1] "133200s (~1.54 days)"
 ```
  
 ---
 
-#References
+#References and more about Lubridate
  
 - Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of Statistical Software, 40(3), 1-25. https://www.jstatsoft.org/v40/i03/.
 
 - Lubridate by Vitalie Spinu, Garrett Grolemund, Hadley Wickham. https://lubridate.tidyverse.org/index.html 
+
+- Lubridate cheatsheet. https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_lubridate.pdf
 ---
 class: center, middle
 # Thanks!
