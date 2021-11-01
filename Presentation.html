@@ -4,7 +4,7 @@
     <title>Dates and times with Lubridate</title>
     <meta charset="utf-8" />
     <meta name="author" content="Esteban Gracia &amp; Lorenzo Gini" />
-    <script src="libs/header-attrs-2.10/header-attrs.js"></script>
+    <script src="libs/header-attrs-2.11/header-attrs.js"></script>
     <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
     <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
   </head>
@@ -22,7 +22,7 @@ class: center, middle, inverse, title-slide
 
 - How many days has a year?
 - How many hours has a day?
-- How many seconds has a minute?   
+- How many seconds has a minute? 
 --
 &lt;div class="figure" style="text-align: right"&gt;
 &lt;img src="maths_lady.png" alt="Source: knowyourmeme.com" width="50%" /&gt;
@@ -30,13 +30,9 @@ class: center, middle, inverse, title-slide
 &lt;/div&gt;
  
 ---
-#Working with dates
+class: inverse, center, middle
 
-- Convert date-strings to a date-time object
-- Find and use the day, month or year from a Date-time object
-- Convert timezones 
-
-
+# Lubridate
 ---
 
 # Dates and times with Lubridate
@@ -47,12 +43,22 @@ Lubridate is installed with the tidiverse:
 
 ```r
 install.packages("tidyverse")  
-library(lubridate)
-library(nycflights13) 
+library(lubridate)  
 ```
+---
+#Working with dates
+
+- Convert date-strings to a date-time object
+- Find and use the day, month or year from a Date-time object
+- Convert timezones  
 
 ---
-#DateTime objects
+class: inverse, center, middle
+
+# Main functions
+
+---
+#DateTime objects 
 
 - We have dates
 - POSIXct and POSIXlt classes 
@@ -62,7 +68,7 @@ library(nycflights13)
 
 
 ```r
-like_date &lt;- as.Date("2021-11-04") 
+like_date &lt;- as.Date("2021-11-04 10:15:20") 
 str(like_date)
 ```
 
@@ -73,14 +79,24 @@ str(like_date)
 
 
 ```r
-like_datetime &lt;- as_datetime("2021-11-04")
-str(like_datetime)
+like_datetime_1 &lt;- as.POSIXct("2021-11-04 10:15:20")
+str(like_datetime_1) 
 ```
 
 ```
-##  POSIXct[1:1], format: "2021-11-04"
+##  POSIXct[1:1], format: "2021-11-04 10:15:20"
 ```
-  
+
+
+```r
+like_datetime_2 &lt;- as.POSIXlt("2021-11-04 10:15:20")
+str(like_datetime_2) 
+```
+
+```
+##  POSIXlt[1:1], format: "2021-11-04 10:15:20"
+```
+
 ---
 #Parsing date-times
 
@@ -119,34 +135,48 @@ mdy("January 31st, 2017") #  1. month 2. day 3. year
 ## [1] "2017-01-31"
 ```
 ---
+#Parsing date-times
+ 
+
+```r
+x &lt;- c("2021-10-01", "02022010", "02-02-2010")
+parse_date_time(x, c("dmy", "ymd")) 
+```
+
+```
+## [1] "2021-10-01 UTC" "2010-02-02 UTC" "2010-02-02 UTC"
+```
+
+ 
+---
 ###From individual components
 
 --
 You can create a variable with datetime objects
 
+```
+##      names day month year hour minute
+## 1    Lucas  21    03 1990   22     21
+## 2    Peter  10    05 1991   20     01
+## 3 Santiago  30    10 1992   19     15
+```
+---
+###From individual components
+
 ```r
-flights %&gt;% #Taken the df from library nycflights
-  select(year, month, day, hour, minute) %&gt;%  
-  mutate(departure = make_datetime(year, month, day, hour, minute))  
+birthdays_people_dates &lt;- birthdays_people %&gt;% 
+  mutate(date_time_birthday = make_datetime(year, month, day, hour, minute))
+
+birthdays_people_dates
 ```
 
 ```
-## # A tibble: 336,776 x 6
-##     year month   day  hour minute departure          
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dttm&gt;             
-##  1  2013     1     1     5     15 2013-01-01 05:15:00
-##  2  2013     1     1     5     29 2013-01-01 05:29:00
-##  3  2013     1     1     5     40 2013-01-01 05:40:00
-##  4  2013     1     1     5     45 2013-01-01 05:45:00
-##  5  2013     1     1     6      0 2013-01-01 06:00:00
-##  6  2013     1     1     5     58 2013-01-01 05:58:00
-##  7  2013     1     1     6      0 2013-01-01 06:00:00
-##  8  2013     1     1     6      0 2013-01-01 06:00:00
-##  9  2013     1     1     6      0 2013-01-01 06:00:00
-## 10  2013     1     1     6      0 2013-01-01 06:00:00
-## # ... with 336,766 more rows
+##      names day month year hour minute  date_time_birthday
+## 1    Lucas  21    03 1990   22     21 1990-03-21 22:21:00
+## 2    Peter  10    05 1991   20     01 1991-05-10 20:01:00
+## 3 Santiago  30    10 1992   19     15 1992-10-30 19:15:00
 ```
-  
+
 ---
 
 # Date time components
@@ -319,24 +349,44 @@ ceiling_date(new_date_2, "month") #more September than August
 # Stamping a template to dates
 
 ```yaml
-date_by_Hertie &lt;- stamp("Created by Hertie, Jan 17, 1999 3:34")   
+date_by_Hertie &lt;- stamp("Created by Hertie, Jan 17, 1999 3:34") 
+date_by_Esteban &lt;- stamp("Created by Esteban, Jan 21, 2021 3:34")
+date_by_Lorenzo &lt;- stamp("Created by Lorenzo, Jan 21, 2021 3:34")
 ``` 
 
-
+--
 
 ```r
-date_by_Hertie(ymd("2010-04-05")) #Stamping
+date_by_Hertie(ymd("2010-04-05"))
 ```
 
 ```
 ## [1] "Created by Hertie, Apr 05, 2010 00:00"
+```
+--
+
+```r
+date_by_Esteban(ymd("2021-11-04")) 
+```
+
+```
+## [1] "Created by Esteban, Nov 04, 2021 00:00"
+```
+--
+
+```r
+date_by_Lorenzo(ymd("2021-11-05")) 
+```
+
+```
+## [1] "Created by Lorenzo, Nov 05, 2021 00:00"
 ```
 
 ---
 
 #Timezones
 
-###Listing timezones
+Lubridate uses the IANA Timezone Database named Olson Database because of his founder Arthur Olson. The nomenclature makes easier to work with timezones.
 
 ```r
 OlsonNames() %&gt;% #List of Timezones
@@ -344,11 +394,11 @@ OlsonNames() %&gt;% #List of Timezones
 ```
 
 ```
-##  [1] "America/Nassau"          "GMT"                    
-##  [3] "Asia/Atyrau"             "Asia/Hebron"            
-##  [5] "Asia/Srednekolymsk"      "Europe/Sarajevo"        
-##  [7] "America/Argentina/Jujuy" "Asia/Dushanbe"          
-##  [9] "Pacific/Galapagos"       "Canada/Saskatchewan"
+##  [1] "Indian/Maldives"           "Brazil/West"              
+##  [3] "America/Argentina/Mendoza" "Asia/Hong_Kong"           
+##  [5] "America/St_Thomas"         "Atlantic/Canary"          
+##  [7] "Asia/Istanbul"             "Canada/Saskatchewan"      
+##  [9] "America/Grand_Turk"        "Pacific/Niue"
 ```
 ---
 #Timezones
@@ -357,24 +407,38 @@ OlsonNames() %&gt;% #List of Timezones
 Getting the current hour in my system: Berlin, Germany
 
 ```r
-x &lt;- now(tzone = Sys.timezone()) #Current hour in my pc
-x
+x_now &lt;- now(tzone = "Europe/Berlin")
+x_now
 ```
 
 ```
-## [1] "2021-10-27 18:36:37 CEST"
+## [1] "2021-11-01 13:55:32 CET"
+```
+
+```r
+x_sys &lt;- now(tzone = Sys.timezone()) #Current hour in my pc
+x_sys
+```
+
+```
+## [1] "2021-11-01 13:55:32 CET"
 ```
 --
 Getting the same hour in Bogotá, Colombia
 
 ```r
-berlin_to_bogota &lt;- with_tz(x, tzon="America/Bogota") #7 Hours diff
+berlin_to_bogota &lt;- with_tz(x_sys, tzon="America/Bogota") #7 Hours diff
 berlin_to_bogota
 ```
 
 ```
-## [1] "2021-10-27 11:36:37 -05"
+## [1] "2021-11-01 07:55:32 -05"
 ```
+
+---
+class: inverse, center, middle
+
+# Time spans
 
 ---
 
@@ -387,7 +451,7 @@ y_date &lt;- ymd_hms("2021-03-01 01:00:00")
 ```
 
 ###Intervals
-Intervals are timespans that begin at a specific instant and end at a specific instant. They provide the only reliable way to convert between periods and durations.
+Intervals are timespans that begin at a specific instant and end at a specific instant. 
 
 ```r
 dates &lt;- interval((x_date),(y_date)) 
@@ -410,7 +474,7 @@ period_dates #Change in clock time of interval
 ## [1] "1d 13H 0M 0S"
 ```
 ###Durations
-Durations record the exact number of seconds in a time span (provide a method for treating time as a mathematical quantity)
+Durations record the exact number of seconds in a time span.
 
 ```r
 duration_dates &lt;- as.duration(period_dates)
@@ -420,7 +484,7 @@ duration_dates #Seconds between the interval
 ```
 ## [1] "133200s (~1.54 days)"
 ```
- 
+
 ---
 
 #References and more about Lubridate
@@ -434,7 +498,7 @@ duration_dates #Seconds between the interval
 class: center, middle
 # Thanks!
 
-Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan). 
+Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).  
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

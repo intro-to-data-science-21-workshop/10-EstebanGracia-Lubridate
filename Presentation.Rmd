@@ -14,20 +14,16 @@ output:
 
 - How many days has a year?
 - How many hours has a day?
-- How many seconds has a minute?   
+- How many seconds has a minute? 
 --
 ```{r, echo=FALSE, out.width="50%", fig.align= 'right', fig.cap="Source: knowyourmeme.com"}
 knitr::include_graphics("maths_lady.png")
 ```
  
 ---
-#Working with dates
+class: inverse, center, middle
 
-- Convert date-strings to a date-time object
-- Find and use the day, month or year from a Date-time object
-- Convert timezones 
-
-
+# Lubridate
 ---
 
 # Dates and times with Lubridate
@@ -36,17 +32,27 @@ Lubridate is installed with the tidiverse:
 
 ```{r load-packages, include=FALSE}
 library(tidyverse)  
-library(lubridate)
-library(nycflights13)
+library(lubridate)  
+library(janitor)
 ```
 ```{r eval=FALSE, tidy=FALSE}
 install.packages("tidyverse")  
-library(lubridate)
-library(nycflights13) 
-```
+library(lubridate)  
+``` 
+---
+#Working with dates
+
+- Convert date-strings to a date-time object
+- Find and use the day, month or year from a Date-time object
+- Convert timezones  
 
 ---
-#DateTime objects
+class: inverse, center, middle
+
+# Main functions
+
+---
+#DateTime objects 
 
 - We have dates
 - POSIXct and POSIXlt classes 
@@ -55,16 +61,21 @@ library(nycflights13)
 --
 
 ```{r}
-like_date <- as.Date("2021-11-04") 
+like_date <- as.Date("2021-11-04 10:15:20") 
 str(like_date)
 ```
 --
 
 ```{r}
-like_datetime <- as_datetime("2021-11-04")
-str(like_datetime)
+like_datetime_1 <- as.POSIXct("2021-11-04 10:15:20")
+str(like_datetime_1) 
 ```
-  
+
+```{r}
+like_datetime_2 <- as.POSIXlt("2021-11-04 10:15:20")
+str(like_datetime_2) 
+```
+
 ---
 #Parsing date-times
 
@@ -88,17 +99,40 @@ ymd("2017-01-31") # 1. year 2. month 3. day
 mdy("January 31st, 2017") #  1. month 2. day 3. year
 ```
 ---
+#Parsing date-times
+ 
+````{r} 
+x <- c("2021-10-01", "02022010", "02-02-2010")
+parse_date_time(x, c("dmy", "ymd")) 
+````
+
+ 
+---
 ###From individual components
 
 --
 You can create a variable with datetime objects
+```{r echo=FALSE}
+names <- c('Lucas','Peter','Santiago')
+day <- c("21", "10", "30")
+month <- c('03','05','10')
+year <- c('1990','1991','1992')
+hour <- c('22', '20', '19')
+minute <- c ('21','01','15')
+birthdays_people <- data.frame(names, day, month, year, hour, minute)
+birthdays_people
+
+```
+---
+###From individual components
 ```{r}
-flights %>% #Taken the df from library nycflights
-  select(year, month, day, hour, minute) %>%  
-  mutate(departure = make_datetime(year, month, day, hour, minute))  
+birthdays_people_dates <- birthdays_people %>% 
+  mutate(date_time_birthday = make_datetime(year, month, day, hour, minute))
+
+birthdays_people_dates
  
 ```
-  
+
 ---
 
 # Date time components
@@ -207,21 +241,33 @@ ceiling_date(new_date_2, "month") #more September than August
 # Stamping a template to dates
 
 ```yaml
-date_by_Hertie <- stamp("Created by Hertie, Jan 17, 1999 3:34")   
+date_by_Hertie <- stamp("Created by Hertie, Jan 17, 1999 3:34") 
+date_by_Esteban <- stamp("Created by Esteban, Jan 21, 2021 3:34")
+date_by_Lorenzo <- stamp("Created by Lorenzo, Jan 21, 2021 3:34")
 ``` 
 ```{r include=FALSE}
-date_by_Hertie <- stamp("Created by Hertie, Jan 17, 1999 3:34") #"Created by Hertie" in object
+date_by_Hertie <- stamp("Created by Hertie, Jan 21, 2021 3:34") # "Created by Hertie" in object
+date_by_Esteban <- stamp("Created by Esteban, Jan 21, 2021 3:34") # "Created by Esteban" in object
+date_by_Lorenzo <- stamp("Created by Lorenzo, Jan 21, 2021 3:34") #"Created by Lorenzo" in object
 ```
-
+--
 ```{r}
-date_by_Hertie(ymd("2010-04-05")) #Stamping
+date_by_Hertie(ymd("2010-04-05"))
+```
+--
+```{r}
+date_by_Esteban(ymd("2021-11-04")) 
+```
+--
+```{r}
+date_by_Lorenzo(ymd("2021-11-05")) 
 ```
 
 ---
 
 #Timezones
 
-###Listing timezones
+Lubridate uses the IANA Timezone Database named Olson Database because of his founder Arthur Olson. The nomenclature makes easier to work with timezones.
 ```{r}
 OlsonNames() %>% #List of Timezones
   sample(10) #Taking a sample of 30 tz
@@ -232,15 +278,23 @@ OlsonNames() %>% #List of Timezones
 
 Getting the current hour in my system: Berlin, Germany
 ```{r} 
-x <- now(tzone = Sys.timezone()) #Current hour in my pc
-x
+x_now <- now(tzone = "Europe/Berlin")
+x_now
+x_sys <- now(tzone = Sys.timezone()) #Current hour in my pc
+x_sys
+
 ``` 
 --
 Getting the same hour in Bogotá, Colombia
 ```{r}   
-berlin_to_bogota <- with_tz(x, tzon="America/Bogota") #7 Hours diff
+berlin_to_bogota <- with_tz(x_sys, tzon="America/Bogota") #7 Hours diff
 berlin_to_bogota
 ``` 
+
+---
+class: inverse, center, middle
+
+# Time spans
 
 ---
 
@@ -252,7 +306,7 @@ y_date <- ymd_hms("2021-03-01 01:00:00")
 ```
 
 ###Intervals
-Intervals are timespans that begin at a specific instant and end at a specific instant. They provide the only reliable way to convert between periods and durations.
+Intervals are timespans that begin at a specific instant and end at a specific instant. 
 ```{r}
 dates <- interval((x_date),(y_date)) 
 dates #Dates now stores an interval of dates
@@ -265,12 +319,12 @@ period_dates <- as.period(dates)
 period_dates #Change in clock time of interval
 ```
 ###Durations
-Durations record the exact number of seconds in a time span (provide a method for treating time as a mathematical quantity)
+Durations record the exact number of seconds in a time span.
 ```{r}
 duration_dates <- as.duration(period_dates)
 duration_dates #Seconds between the interval
 ```
- 
+
 ---
 
 #References and more about Lubridate
@@ -284,4 +338,4 @@ duration_dates #Seconds between the interval
 class: center, middle
 # Thanks!
 
-Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan). 
+Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).  
