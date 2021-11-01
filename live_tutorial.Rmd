@@ -19,7 +19,7 @@ library(lubridate)
 ```
 
 Once you have done it we can start to work with it. 
-Let's start with the easy, but very useful. functions. How many times do you need to convert number or string in a date? (I know, none. But that is what we are doing okay, so keep attention).
+Let's start with the easy, but very useful. functions. How many times do you need to convert number or string in a date?
 
 ```{r}
 
@@ -46,16 +46,7 @@ french_revolution
 with_tz(french_revolution, tz = 'America/Bogota')
 ```
 
-
-Everyone love works with tidy data, but be realistic how many times this happen? Lubridate helps you also with that.
-
-```{r}
-x <- c("09-07-01", "05-01-02", "09-01-13", "09-11-2003")
-
-parse_date_time(x, "ymd") 
-parse_date_time(x, c("ymd", "dmy"))
-
-```
+#Work with data frame 
 
 I wont know show the more useful function of the library: make_datetime. Given the input of year, month, day, hours, ... it return the date. Let's apply it to a small dataset to see how it works.
 
@@ -85,7 +76,7 @@ cze_core %>%
 
 ```
 
-Wow very quick, I passed hours on this exercise a couple of weeks ago... Almost finished, let's have some fun. Who wants to plot the day of the week in wich the politicians born?
+Wow very quick, I passed hours on this exercise a couple of weeks ago... Almost finished, let's have some fun. Who wants to plot the day of the week in which the politicians born?
 
 ```{r}
 
@@ -97,3 +88,20 @@ cze_core %>%
   labs(x = 'Day of the week' , y = 'Freq', title = "Day of birth")
 
 ```
+
+
+#Exercise
+
+```{r}
+
+names <- c('Lucas','Peter','Santiago')
+day <- c("21", "10", "30")
+month <- c('03','05','10')
+year <- c('1990','1991','1992')
+birthdays_people <- data.frame(names, day, month, year)
+
+```
+
+Given this veruy easy data frame, can you calculate the age in days of each people?
+
+what is exact difference in age between Lucas and Santiago?
